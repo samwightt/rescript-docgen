@@ -16,7 +16,8 @@
   "bs-dependencies": [
     "@rescript/core",
     "rescript-bun",
-    "@rescript/tools"
+    "@rescript/tools",
+    "sury"
   ],
   "bsc-flags": [
     "-open RescriptCore"
