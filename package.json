@@ -6,7 +6,8 @@
     "res:clean": "rescript clean",
     "res:dev": "rescript -w",
     "dev": "bun --watch ./src/Main.res.mjs",
-    "test:watch": "bun test ./test/*.mjs --watch"
+    "test:watch": "bun test ./test/*.mjs --watch",
+    "test": "bun test ./test/*.mjs"
   },
   "keywords": [
     "rescript"

@@ -7,6 +7,7 @@ describe("RescriptConfig", () => {
       () => {
         `{ "name": "asdf project", "sources": "./src" }`
         ->RescriptConfig.configFromJsonString
+        ->Result.getExn
         ->expect
         ->Expect.toEqual({
           name: "asdf project",
@@ -31,7 +32,9 @@ describe("RescriptConfig", () => {
           "works with dependencies",
           () => {
             let parsed =
-              `{ "name": "another project", "sources": "./src", "bs-dependencies": ["rescript-bun"] }`->RescriptConfig.configFromJsonString
+              `{ "name": "another project", "sources": "./src", "bs-dependencies": ["rescript-bun"] }`
+              ->RescriptConfig.configFromJsonString
+              ->Result.getExn
             parsed.dependencies
             ->expect
             ->Expect.toEqual(["rescript-bun"])
@@ -42,7 +45,9 @@ describe("RescriptConfig", () => {
           "works with dev deps",
           () => {
             let parsed =
-              `{ "name": "another project", "sources": "./src", "bs-dev-dependencies": ["rescript-bun"] }`->RescriptConfig.configFromJsonString
+              `{ "name": "another project", "sources": "./src", "bs-dev-dependencies": ["rescript-bun"] }`
+              ->RescriptConfig.configFromJsonString
+              ->Result.getExn
             parsed.devDependencies
             ->expect
             ->Expect.toEqual(["rescript-bun"])
@@ -53,7 +58,9 @@ describe("RescriptConfig", () => {
           "works with pinned deps",
           () => {
             let parsed =
-              `{ "name": "another project", "sources": "./src", "pinned-dependencies": ["rescript-bun"] }`->RescriptConfig.configFromJsonString
+              `{ "name": "another project", "sources": "./src", "pinned-dependencies": ["rescript-bun"] }`
+              ->RescriptConfig.configFromJsonString
+              ->Result.getExn
 
             parsed.pinnedDependencies
             ->expect
@@ -66,6 +73,7 @@ describe("RescriptConfig", () => {
           () => {
             `{ "name": "another project", "sources": "./src", "bs-dependencies": ["rescript-bun"], "bs-dev-dependencies": ["rescript-bun"], "pinned-dependencies": ["rescript-bun"] }`
             ->RescriptConfig.configFromJsonString
+            ->Result.getExn
             ->expect
             ->Expect.toEqual({
               name: "another project",
@@ -97,6 +105,7 @@ describe("RescriptConfig", () => {
           () => {
             `{ "name": "another project", "sources": [{ "dir": "./src" }] }`
             ->RescriptConfig.configFromJsonString
+            ->Result.getExn
             ->getSources
             ->expect
             ->Expect.toEqual([
@@ -114,6 +123,7 @@ describe("RescriptConfig", () => {
           () => {
             `{ "name": "another project", "sources": [{ "dir": "./src" }] }`
             ->RescriptConfig.configFromJsonString
+            ->Result.getExn
             ->getSources
             ->expect
             ->Expect.toEqual([
@@ -131,6 +141,7 @@ describe("RescriptConfig", () => {
           () => {
             `{ "name": "another project", "sources": [{ "dir": "./src", "subdirs": true }] }`
             ->RescriptConfig.configFromJsonString
+            ->Result.getExn
             ->getSources
             ->expect
             ->Expect.toEqual([
@@ -148,6 +159,7 @@ describe("RescriptConfig", () => {
           () => {
             `{ "name": "another project", "sources": [{ "dir": "./src", "type": "dev" }] }`
             ->RescriptConfig.configFromJsonString
+            ->Result.getExn
             ->getSources
             ->expect
             ->Expect.toEqual([
@@ -165,6 +177,7 @@ describe("RescriptConfig", () => {
           () => {
             `{ "name": "another project", "sources": ["./src", "./example"] }`
             ->RescriptConfig.configFromJsonString
+            ->Result.getExn
             ->getSources
             ->expect
             ->Expect.toEqual([
@@ -183,6 +196,7 @@ describe("RescriptConfig", () => {
           () => {
             `{ "name": "another project", "sources": ["./src", { "dir": "./example" }] }`
             ->RescriptConfig.configFromJsonString
+            ->Result.getExn
             ->getSources
             ->expect
             ->Expect.toEqual([
@@ -205,6 +219,7 @@ describe("RescriptConfig", () => {
           () => {
             `{ "name": "another project", "sources": [{ "dir": "./src", "type": "dev" }] }`
             ->RescriptConfig.configFromJsonString
+            ->Result.getExn
             ->getSources
             ->expect
             ->Expect.toEqual([
@@ -216,6 +231,119 @@ describe("RescriptConfig", () => {
             ])
           },
         )
+
+        test(
+          "works with subdirs as SubdirList",
+          () => {
+            `{ "name": "another project", "sources": [{ "dir": "./src", "subdirs": ["./nested", { "dir": "./nested2" }] }] }`
+            ->RescriptConfig.configFromJsonString
+            ->Result.getExn
+            ->getSources
+            ->expect
+            ->Expect.toEqual([
+              {
+                dir: "./src",
+                isDev: false,
+                subdirs: SubdirList([
+                  {
+                    dir: "./nested",
+                    isDev: false,
+                    subdirs: NoSubdirs,
+                  },
+                  {
+                    dir: "./nested2",
+                    isDev: false,
+                    subdirs: NoSubdirs,
+                  },
+                ]),
+              },
+            ])
+          },
+        )
+
+        test(
+          "works with deeply nested subdirs",
+          () => {
+            `{ "name": "another project", "sources": [{ "dir": "./src", "subdirs": [{ "dir": "./nested", "subdirs": ["./deeply-nested"] }] }] }`
+            ->RescriptConfig.configFromJsonString
+            ->Result.getExn
+            ->getSources
+            ->expect
+            ->Expect.toEqual([
+              {
+                dir: "./src",
+                isDev: false,
+                subdirs: SubdirList([
+                  {
+                    dir: "./nested",
+                    isDev: false,
+                    subdirs: SubdirList([
+                      {
+                        dir: "./deeply-nested",
+                        isDev: false,
+                        subdirs: NoSubdirs,
+                      },
+                    ]),
+                  },
+                ]),
+              },
+            ])
+          },
+        )
+      },
+    )
+
+    describe(
+      "error cases",
+      () => {
+        test(
+          "when name field is missing",
+          () => {
+            `{ "sources": "./src" }`
+            ->RescriptConfig.configFromJsonString
+            ->expect
+            ->Expect.toEqual(
+              Error("Failed parsing at [\"name\"]: Expected string, received undefined"),
+            )
+          },
+        )
+      },
+    )
+  })
+
+  describe("configFromJson", () => {
+    test(
+      "parses JSON object",
+      () => {
+        let json = %raw(`{ "name": "test project", "sources": "./src" }`)
+        json
+        ->RescriptConfig.configFromJson
+        ->Result.getExn
+        ->expect
+        ->Expect.toEqual({
+          name: "test project",
+          dependencies: [],
+          devDependencies: [],
+          pinnedDependencies: [],
+          sources: [
+            {
+              dir: "./src",
+              isDev: false,
+              subdirs: NoSubdirs,
+            },
+          ],
+        })
+      },
+    )
+
+    test(
+      "returns error for invalid JSON object",
+      () => {
+        let json = %raw(`{ "sources": "./src" }`) // missing required "name" field
+        json
+        ->RescriptConfig.configFromJson
+        ->expect
+        ->Expect.toEqual(Error("Failed parsing at [\"name\"]: Expected string, received undefined"))
       },
     )
   })

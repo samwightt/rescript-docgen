@@ -70,8 +70,8 @@ let subdirs = sourcesRef =>
         | SubdirList(x) => x
         | _ => s.fail("Should not happen!")
         }
-      }
-    })
+      },
+    }),
   ])
 
 /**
@@ -167,15 +167,23 @@ let configSpec = S.object(s => {
 })
 
 /**
- Parses the JSON string or throws.
+ Parses the JSON string and returns a result.
  */
-let configFromJsonString = (jsonString: string) => {
-  S.parseJsonStringOrThrow(jsonString, configSpec)
+let configFromJsonString = (jsonString: string): result<t, string> => {
+  try {
+    Ok(S.parseJsonStringOrThrow(jsonString, configSpec))
+  } catch {
+  | S.Error(error) => Error(error.message)
+  }
 }
 
 /**
- Parses the JSON object or throws.
+ Parses the JSON object and returns a result.
  */
-let configFromJson = (json: JSON.t) => {
-  S.parseJsonOrThrow(json, configSpec)
+let configFromJson = (json: JSON.t): result<t, string> => {
+  try {
+    Ok(S.parseJsonOrThrow(json, configSpec))
+  } catch {
+  | S.Error(error) => Error(error.message)
+  }
 }
