@@ -1,16 +1,22 @@
 {
   "name": "rescript-docgen",
-  "sources": {
+  "sources": [{
     "dir": "src",
     "subdirs": true
-  },
+  }, {
+    "dir": "test",
+    "subdirs": true,
+    "type": "dev"
+  }],
   "package-specs": {
     "module": "esmodule",
     "in-source": true
   },
   "suffix": ".res.mjs",
   "bs-dependencies": [
-    "@rescript/core"
+    "@rescript/core",
+    "rescript-bun",
+    "@rescript/tools"
   ],
   "bsc-flags": [
     "-open RescriptCore"
