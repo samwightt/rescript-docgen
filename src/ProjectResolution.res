@@ -51,3 +51,41 @@ let rec getSourceDirs = (sources: array<RescriptConfig.sourceItem>, path: string
   // We need one last Array.flat on top of this, because `Promise.all` will return a two-dimensional array. ugh.
   ->Promise.thenResolve(Array.flat)
 }
+
+/**
+ Given a project's source list, returns a list of all modules in that project.
+ Returns a list of absolute paths to those modules.
+ */
+let projectModules = async (sources: array<RescriptConfig.sourceItem>, path: string): array<string> => {
+  let projectDirectories = await getSourceDirs(sources, path)
+
+  let glob = Bun.Glob.make("*.res")
+
+  // Glob uses async iterator so unfortunately we have to async iterator forEach and iteratively PUSH TO THE ARRAY
+  // LIKE WE'RE NEANDERTHALS. UGH.
+
+  let pathArr = []
+
+  let scan = async (dir: string): unit => {
+    await glob->Bun.Glob.scan(~options = {
+      // Rescript implement Rust Default trait challenge: impossible edition
+      cwd: dir,
+      absolute: true,
+      onlyFiles: true,
+      dot: false,
+      throwErrorOnBrokenSymlink: false,
+      followSymlinks: false
+    // Why we don't have more methods for async iterator is beyond me.
+    })->AsyncIterator.forEach(item => {
+      switch item {
+      | Some(path) => Array.push(pathArr, path)
+      | None => ()
+      }
+    })
+  }
+
+  // Run concurrently and wait for them all to finish. Then we can return.
+  (await projectDirectories->Array.map(scan)->Promise.all)->ignore
+
+  pathArr
+}

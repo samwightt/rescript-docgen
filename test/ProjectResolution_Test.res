@@ -1,25 +1,23 @@
 open RescriptBun.Test
 
+let orderIndependentEqual = (arr, shouldEqual) => {
+  arr
+  ->expect
+  ->Expect.toHaveLength(shouldEqual->Array.length->Int.toFloat)
+
+  shouldEqual->Array.forEach(item => {
+    arr
+    ->expect
+    ->Expect.toContain(item)
+  })
+}
+
 describe("ProjectResolution", () => {
   describe("getSourceDirs", () => {
     let pathsToSources = x =>
       x->Array.map(
         (path): RescriptConfig.sourceItem => {dir: path, isDev: false, subdirs: NoSubdirs},
       )
-
-    let orderIndependentEqual = (arr, shouldEqual) => {
-      arr
-      ->expect
-      ->Expect.toHaveLength(shouldEqual->Array.length->Int.toFloat)
-
-      shouldEqual->Array.forEach(
-        item => {
-          arr
-          ->expect
-          ->Expect.toContain(item)
-        },
-      )
-    }
 
     testAsync(
       "concats source dirs with path",
@@ -87,7 +85,7 @@ describe("ProjectResolution", () => {
       "handles TraverseAll subdirs",
       async () => {
         let basePath = RescriptBun.Global.dirname
-        let root = RescriptBun.Path.resolve([basePath, "../"])
+        let root = RescriptBun.Path.resolve([RescriptBun.Global.dirname, "../"])
         let res = await ProjectResolution.getSourceDirs(
           [
             {
@@ -110,6 +108,36 @@ describe("ProjectResolution", () => {
           ]->Array.map(x => RescriptBun.Path.resolve([root, x]))
 
         orderIndependentEqual(res, expectedDirs)
+      },
+    )
+  })
+
+  describe("projectModules", () => {
+    let projectRoot = RescriptBun.Path.resolve([RescriptBun.Global.dirname, "../"])
+
+    // TODO: Make this so you don't have to update the expectedModules array any time a new module is updated lmao.
+    testAsync(
+      "it works as expected",
+      async () => {
+        let fakeSources = await ProjectResolution.projectModules(
+          [
+            {
+              dir: "src",
+              isDev: false,
+              subdirs: NoSubdirs,
+            },
+          ],
+          projectRoot,
+        )
+
+        let expectedModules = [
+          "src/ProjectResolution.res",
+          "src/RescriptConfig.res",
+          "src/Main.res",
+          "src/Docgen.res"
+        ]->Array.map(x => RescriptBun.Path.resolve([projectRoot, x]))
+
+        orderIndependentEqual(fakeSources, expectedModules)
       },
     )
   })

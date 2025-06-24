@@ -4,6 +4,13 @@ import * as Buntest from "bun:test";
 import * as Nodepath from "node:path";
 import * as ProjectResolution from "../src/ProjectResolution.res.mjs";
 
+function orderIndependentEqual(arr, shouldEqual) {
+  Buntest.expect(arr).toHaveLength(shouldEqual.length);
+  shouldEqual.forEach(function (item) {
+        Buntest.expect(arr).toContain(item);
+      });
+}
+
 Buntest.describe("ProjectResolution", (function () {
         Buntest.describe("getSourceDirs", (function () {
                 var pathsToSources = function (x) {
@@ -14,12 +21,6 @@ Buntest.describe("ProjectResolution", (function () {
                                       subdirs: "NoSubdirs"
                                     };
                             });
-                };
-                var orderIndependentEqual = function (arr, shouldEqual) {
-                  Buntest.expect(arr).toHaveLength(shouldEqual.length);
-                  shouldEqual.forEach(function (item) {
-                        Buntest.expect(arr).toContain(item);
-                      });
                 };
                 Buntest.test("concats source dirs with path", (async function () {
                         var res = await ProjectResolution.getSourceDirs(pathsToSources([
@@ -62,8 +63,7 @@ Buntest.describe("ProjectResolution", (function () {
                                   ]);
                       }));
                 Buntest.test("handles TraverseAll subdirs", (async function () {
-                        var basePath = __dirname;
-                        var root = Nodepath.resolve(basePath, "../");
+                        var root = Nodepath.resolve(__dirname, "../");
                         var res = await ProjectResolution.getSourceDirs([{
                                 dir: "./node_modules/sury",
                                 isDev: false,
@@ -82,9 +82,28 @@ Buntest.describe("ProjectResolution", (function () {
                         return orderIndependentEqual(res, expectedDirs);
                       }));
               }));
+        Buntest.describe("projectModules", (function () {
+                var projectRoot = Nodepath.resolve(__dirname, "../");
+                Buntest.test("it works as expected", (async function () {
+                        var fakeSources = await ProjectResolution.projectModules([{
+                                dir: "src",
+                                isDev: false,
+                                subdirs: "NoSubdirs"
+                              }], projectRoot);
+                        var expectedModules = [
+                            "src/ProjectResolution.res",
+                            "src/RescriptConfig.res",
+                            "src/Main.res",
+                            "src/Docgen.res"
+                          ].map(function (x) {
+                              return Nodepath.resolve(projectRoot, x);
+                            });
+                        return orderIndependentEqual(fakeSources, expectedModules);
+                      }));
+              }));
       }));
 
 export {
-  
+  orderIndependentEqual ,
 }
 /*  Not a pure module */
