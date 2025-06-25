@@ -55,9 +55,14 @@ async function projectModules(sources, path) {
   return pathArr;
 }
 
+function pathToModuleName(path) {
+  return Nodepath.basename(path, ".res");
+}
+
 export {
   getAllDirectories ,
   getSourceDirs ,
   projectModules ,
+  pathToModuleName ,
 }
 /* bun Not a pure module */

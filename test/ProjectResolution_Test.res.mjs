@@ -101,6 +101,11 @@ Buntest.describe("ProjectResolution", (function () {
                         return orderIndependentEqual(fakeSources, expectedModules);
                       }));
               }));
+        Buntest.describe("pathToModule", (function () {
+                Buntest.test("works", (function () {
+                        Buntest.expect(ProjectResolution.pathToModuleName("/hi/hello/Path.res")).toEqual("Path");
+                      }));
+              }));
       }));
 
 export {

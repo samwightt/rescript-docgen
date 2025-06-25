@@ -89,3 +89,8 @@ let projectModules = async (sources: array<RescriptConfig.sourceItem>, path: str
 
   pathArr
 }
+
+let pathToModuleName = (path: string) => {
+  path
+  ->RescriptBun.Path.basenameExt(".res")
+}

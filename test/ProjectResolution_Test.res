@@ -141,4 +141,13 @@ describe("ProjectResolution", () => {
       },
     )
   })
+
+  describe("pathToModule", () => {
+    test("works", () => {
+      "/hi/hello/Path.res"
+      ->ProjectResolution.pathToModuleName
+      ->expect
+      ->Expect.toEqual("Path")
+    })
+  })
 })
