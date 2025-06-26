@@ -1,6 +1,5 @@
 {
-  "name": "@rescript-docgen/core",
-  "namespace": "DocgenCore",
+  "name": "@rescript-docgen/docserver",
   "sources": [{
     "dir": "src",
     "subdirs": true
@@ -17,8 +16,7 @@
   "bs-dependencies": [
     "@rescript/core",
     "rescript-bun",
-    "@rescript/tools",
-    "sury"
+    "@rescript-docgen/core"
   ],
   "bsc-flags": [
     "-open RescriptCore"
