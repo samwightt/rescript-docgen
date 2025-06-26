@@ -1,5 +1,5 @@
 {
-  "name": "rescript-docgen",
+  "name": "@rescript-docgen/core",
   "version": "0.0.0",
   "scripts": {
     "res:build": "rescript",
