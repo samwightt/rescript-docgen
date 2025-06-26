@@ -1,6 +1,10 @@
 {
   "name": "rescript-docgen",
   "version": "0.0.0",
+  "private": true,
+  "workspaces": [
+    "examples/*"
+  ],
   "scripts": {
     "res:build": "rescript",
     "res:clean": "rescript clean",
