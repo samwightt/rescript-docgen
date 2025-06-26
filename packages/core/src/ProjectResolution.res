@@ -94,3 +94,13 @@ let pathToModuleName = (path: string) => {
   path
   ->RescriptBun.Path.basenameExt(".res")
 }
+
+let findProjectConfig = async (path: string): result<RescriptConfig.t, string> => {
+  let file = Path.resolve([path, "rescript.json"])->Bun.file
+  let exists = await Bun.BunFile.exists(file)
+  if !exists {
+    Error("No rescript.json file found")
+  } else {
+    await file->Bun.BunFile.text->Promise.thenResolve(RescriptConfig.configFromJsonString)
+  }
+}

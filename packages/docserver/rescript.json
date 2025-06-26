@@ -1,13 +1,19 @@
 {
   "name": "@rescript-docgen/docserver",
-  "sources": [{
-    "dir": "src",
-    "subdirs": true
-  }, {
-    "dir": "test",
-    "subdirs": true,
-    "type": "dev"
-  }],
+  "sources": [
+    {
+      "dir": "src",
+      "subdirs": true
+    },
+    {
+      "dir": "test",
+      "subdirs": true,
+      "type": "dev"
+    }
+  ],
+  "jsx": {
+    "module": "Hjsx"
+  },
   "package-specs": {
     "module": "esmodule",
     "in-source": true
@@ -16,9 +22,13 @@
   "bs-dependencies": [
     "@rescript/core",
     "rescript-bun",
-    "@rescript-docgen/core"
+    "@rescript-docgen/core",
+    "rescript-x"
   ],
   "bsc-flags": [
-    "-open RescriptCore"
+    "-open RescriptCore",
+    "-open RescriptBun",
+    "-open RescriptBun.Globals",
+    "-open ResX.Globals"
   ]
 }

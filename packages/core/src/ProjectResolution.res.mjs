@@ -4,6 +4,7 @@ import * as $$Bun from "bun";
 import * as Nodepath from "node:path";
 import * as Promises from "fs/promises";
 import * as Core__AsyncIterator from "@rescript/core/src/Core__AsyncIterator.res.mjs";
+import * as RescriptConfig$DocgenCore from "./RescriptConfig.res.mjs";
 
 async function getAllDirectories(directoryPath) {
   var dirents = await Promises.readdir(directoryPath, {"withFileTypes": true, "recursive": true});
@@ -59,10 +60,24 @@ function pathToModuleName(path) {
   return Nodepath.basename(path, ".res");
 }
 
+async function findProjectConfig(path) {
+  var file = Bun.file(Nodepath.resolve(path, "rescript.json"));
+  var exists = await file.exists();
+  if (exists) {
+    return await file.text().then(RescriptConfig$DocgenCore.configFromJsonString);
+  } else {
+    return {
+            TAG: "Error",
+            _0: "No rescript.json file found"
+          };
+  }
+}
+
 export {
   getAllDirectories ,
   getSourceDirs ,
   projectModules ,
   pathToModuleName ,
+  findProjectConfig ,
 }
 /* bun Not a pure module */
