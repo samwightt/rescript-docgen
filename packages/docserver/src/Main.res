@@ -8,28 +8,58 @@ let unwrapResultPromise = (result: result<promise<'a>, 'b>): promise<result<'a, 
   switch result {
   | Ok(promise) => promise->Promise.thenResolve(x => Ok(x))
   | Error(err) => {
-    let newErr: result<'a, 'b> = Error(err)
-    Promise.resolve(newErr)
-  }
+      let newErr: result<'a, 'b> = Error(err)
+      Promise.resolve(newErr)
+    }
   }
 }
 
 let currentProjectDetails = async () => {
-  let currentDirectory = Process.process->Process.cwd;
+  let currentDirectory = Process.process->Process.cwd
   let currentConfig = await DocgenCore.ProjectResolution.findProjectConfig(currentDirectory)
 
   await currentConfig
-    ->Result.map(config => {
-      DocgenCore.ProjectResolution.projectModules(config.sources, currentDirectory)
-    })
-    ->unwrapResultPromise
-    ->Promise.thenResolve(Result.map(_, moduleList => {
-      moduleList
-      ->Array.map(modulePath => {
-        "path": modulePath,
-        "name": DocgenCore.ProjectResolution.pathToModuleName(modulePath)
-      })
-    }))
+  ->Result.map(config => {
+    DocgenCore.ProjectResolution.projectModules(config.sources, currentDirectory)
+  })
+  ->unwrapResultPromise
+  ->Promise.thenResolve(
+    Result.map(_, moduleList => {
+      moduleList->Array.map(modulePath =>
+        {
+          "path": modulePath,
+          "name": DocgenCore.ProjectResolution.pathToModuleName(modulePath),
+        }
+      )
+    }),
+  )
+}
+
+let indexRoute = async () => {
+  let deets = switch await currentProjectDetails() {
+  | Ok(deets) =>
+    <>
+      {Array.map(deets, mod => {
+        <div> {Hjsx.string(mod["name"])} </div>
+      })->Hjsx.array}
+    </>
+  | Error(error) => <> {Hjsx.string(error)} </>
+  }
+
+  <Layout.Html>
+    <div>
+      {Hjsx.string("Start page!")}
+      deets
+    </div>
+  </Layout.Html>
+}
+
+let notFoundRoute = async () => {
+  <Layout.Html>
+    <div>
+      {Hjsx.string("404")}
+    </div>
+  </Layout.Html>
 }
 
 let server = Bun.serve({
@@ -44,36 +74,19 @@ let server = Bun.serve({
         setupHeaders: () => {
           Headers.make(~init=FromArray([("Content-Type", "text/html")]))
         },
-        render: async ({ path, requestController, headers}) => {
+        render: async ({path, requestController, headers}) => {
           switch path {
           // | list{"sitemap.xml"} => <SiteMap />
-          | appRoutes =>
+          | list{} => {
             requestController->ResX.RequestController.appendTitleSegment("Test App")
-
-            let deets = switch await currentProjectDetails() {
-            | Ok(deets) => <>
-                {Array.map(deets, (mod) => {
-                  <div>
-                    {Hjsx.string(mod["name"])}
-                  </div>
-                })->Hjsx.array}
-              </>
-            | Error(error) => <>
-                {Hjsx.string(error)}
-              </>
-            }
-
-            <Layout.Html>
-              <div>
-                {Hjsx.string("Start page!")}
-                deets
-              </div>
-            </Layout.Html>
+            await indexRoute()
           }
-        }
+          | _ => await notFoundRoute()
+          }
+        },
       })
     }
-  }
+  },
 })
 
 let portString = server->Bun.Server.port->Int.toString

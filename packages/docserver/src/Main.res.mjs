@@ -52,6 +52,36 @@ async function currentProjectDetails() {
             });
 }
 
+async function indexRoute() {
+  var deets = await currentProjectDetails();
+  var deets$1;
+  deets$1 = deets.TAG === "Ok" ? Hjsx$ResX.jsx(Hjsx$ResX.jsxFragment, {
+          children: Caml_option.some(deets._0.map(function (mod) {
+                    return Hjsx$ResX.Elements.jsx("div", {
+                                children: mod.name
+                              });
+                  }))
+        }) : Hjsx$ResX.jsx(Hjsx$ResX.jsxFragment, {
+          children: Caml_option.some(deets._0)
+        });
+  return Hjsx$ResX.jsx(Layout.Html.make, {
+              children: Hjsx$ResX.Elements.jsxs("div", {
+                    children: [
+                      "Start page!",
+                      deets$1
+                    ]
+                  })
+            });
+}
+
+async function notFoundRoute() {
+  return Hjsx$ResX.jsx(Layout.Html.make, {
+              children: Hjsx$ResX.Elements.jsx("div", {
+                    children: "404"
+                  })
+            });
+}
+
 var server = Bun.serve({
       development: BunUtils$ResX.isDev,
       port: 4444,
@@ -63,26 +93,12 @@ var server = Bun.serve({
             return await Handlers$ResX.handleRequest(Handler.handler, {
                         request: request,
                         render: (async function (param) {
-                            RequestController$ResX.appendTitleSegment(param.requestController, "Test App");
-                            var deets = await currentProjectDetails();
-                            var deets$1;
-                            deets$1 = deets.TAG === "Ok" ? Hjsx$ResX.jsx(Hjsx$ResX.jsxFragment, {
-                                    children: Caml_option.some(deets._0.map(function (mod) {
-                                              return Hjsx$ResX.Elements.jsx("div", {
-                                                          children: mod.name
-                                                        });
-                                            }))
-                                  }) : Hjsx$ResX.jsx(Hjsx$ResX.jsxFragment, {
-                                    children: Caml_option.some(deets._0)
-                                  });
-                            return Hjsx$ResX.jsx(Layout.Html.make, {
-                                        children: Hjsx$ResX.Elements.jsxs("div", {
-                                              children: [
-                                                "Start page!",
-                                                deets$1
-                                              ]
-                                            })
-                                      });
+                            if (param.path) {
+                              return await notFoundRoute();
+                            } else {
+                              RequestController$ResX.appendTitleSegment(param.requestController, "Test App");
+                              return await indexRoute();
+                            }
                           }),
                         setupHeaders: (function () {
                             return new Headers([[
@@ -109,6 +125,8 @@ export {
   port ,
   unwrapResultPromise ,
   currentProjectDetails ,
+  indexRoute ,
+  notFoundRoute ,
   server ,
   portString ,
 }
