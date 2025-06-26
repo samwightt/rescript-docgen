@@ -5,22 +5,22 @@ import * as Buntest from "bun:test";
 import * as Nodepath from "node:path";
 import * as Core__Result from "@rescript/core/src/Core__Result.res.mjs";
 
-function getCoreModulePath(moduleName) {
-  return Nodepath.resolve(__dirname, "../node_modules/@rescript/core/src", moduleName);
+function getExampleModulePath(moduleName) {
+  return Nodepath.resolve(__dirname, "../../../examples/test-project/src", moduleName);
 }
 
 Buntest.describe("Docgen", (function () {
         Buntest.describe("parseModule", (function () {
-                Buntest.test("it should work with RescriptCore modules", (async function () {
-                        var result = await Docgen.parseModule(getCoreModulePath("Core__Map.res"));
+                Buntest.test("it should work with example modules", (async function () {
+                        var result = await Docgen.parseModule(getExampleModulePath("MathUtils.res"));
                         var result$1 = Core__Result.getExn(result);
-                        Buntest.expect(result$1.name).toEqual("Core__Map");
-                        var differentResult = await Docgen.parseModule(getCoreModulePath("Core__Array.res"));
+                        Buntest.expect(result$1.name).toEqual("MathUtils");
+                        var differentResult = await Docgen.parseModule(getExampleModulePath("StringHelpers.res"));
                         var actualResult = Core__Result.getExn(differentResult);
-                        Buntest.expect(actualResult.name).toEqual("Core__Array");
+                        Buntest.expect(actualResult.name).toEqual("StringHelpers");
                       }));
                 Buntest.test("it handles the case where the module doesn't exist", (async function () {
-                        var result = await Docgen.parseModule(getCoreModulePath("DoesNotExist.res"));
+                        var result = await Docgen.parseModule(getExampleModulePath("DoesNotExist.res"));
                         Buntest.expect(result).toEqual({
                               TAG: "Error",
                               _0: "FileDoesNotExist"
@@ -30,6 +30,6 @@ Buntest.describe("Docgen", (function () {
       }));
 
 export {
-  getCoreModulePath ,
+  getExampleModulePath ,
 }
 /*  Not a pure module */

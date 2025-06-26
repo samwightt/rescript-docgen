@@ -84,12 +84,11 @@ describe("ProjectResolution", () => {
     testAsync(
       "handles TraverseAll subdirs",
       async () => {
-        let basePath = RescriptBun.Global.dirname
-        let root = RescriptBun.Path.resolve([RescriptBun.Global.dirname, "../"])
+        let root = RescriptBun.Path.resolve([RescriptBun.Global.dirname, "../../../"])
         let res = await ProjectResolution.getSourceDirs(
           [
             {
-              dir: "./node_modules/sury",
+              dir: "./examples/test-project/src",
               isDev: false,
               subdirs: TraverseAll,
             },
@@ -97,15 +96,10 @@ describe("ProjectResolution", () => {
           root,
         )
 
-        let expectedDirs =
-          [
-            "node_modules/sury",
-            "node_modules/sury/src",
-            "node_modules/sury/lib",
-            "node_modules/sury/ocaml",
-            "node_modules/sury/bs",
-            "node_modules/sury/src",
-          ]->Array.map(x => RescriptBun.Path.resolve([root, x]))
+        let expectedDirs = [
+          // TODO: Add more test directories to our project.
+          "examples/test-project/src"
+        ]->Array.map(x => RescriptBun.Path.resolve([root, x]))
 
         orderIndependentEqual(res, expectedDirs)
       },
@@ -113,9 +107,8 @@ describe("ProjectResolution", () => {
   })
 
   describe("projectModules", () => {
-    let projectRoot = RescriptBun.Path.resolve([RescriptBun.Global.dirname, "../"])
+    let projectRoot = RescriptBun.Path.resolve([RescriptBun.Global.dirname, "../../../examples/test-project"])
 
-    // TODO: Make this so you don't have to update the expectedModules array any time a new module is updated lmao.
     testAsync(
       "it works as expected",
       async () => {
@@ -131,10 +124,10 @@ describe("ProjectResolution", () => {
         )
 
         let expectedModules = [
-          "src/ProjectResolution.res",
-          "src/RescriptConfig.res",
-          "src/Main.res",
-          "src/Docgen.res"
+          "src/MathUtils.res",
+          "src/StringHelpers.res",
+          "src/ArrayUtils.res",
+          "src/UserTypes.res"
         ]->Array.map(x => RescriptBun.Path.resolve([projectRoot, x]))
 
         orderIndependentEqual(fakeSources, expectedModules)

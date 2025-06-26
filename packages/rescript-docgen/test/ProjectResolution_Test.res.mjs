@@ -63,27 +63,20 @@ Buntest.describe("ProjectResolution", (function () {
                                   ]);
                       }));
                 Buntest.test("handles TraverseAll subdirs", (async function () {
-                        var root = Nodepath.resolve(__dirname, "../");
+                        var root = Nodepath.resolve(__dirname, "../../../");
                         var res = await ProjectResolution.getSourceDirs([{
-                                dir: "./node_modules/sury",
+                                dir: "./examples/test-project/src",
                                 isDev: false,
                                 subdirs: "TraverseAll"
                               }], root);
-                        var expectedDirs = [
-                            "node_modules/sury",
-                            "node_modules/sury/src",
-                            "node_modules/sury/lib",
-                            "node_modules/sury/ocaml",
-                            "node_modules/sury/bs",
-                            "node_modules/sury/src"
-                          ].map(function (x) {
+                        var expectedDirs = ["examples/test-project/src"].map(function (x) {
                               return Nodepath.resolve(root, x);
                             });
                         return orderIndependentEqual(res, expectedDirs);
                       }));
               }));
         Buntest.describe("projectModules", (function () {
-                var projectRoot = Nodepath.resolve(__dirname, "../");
+                var projectRoot = Nodepath.resolve(__dirname, "../../../examples/test-project");
                 Buntest.test("it works as expected", (async function () {
                         var fakeSources = await ProjectResolution.projectModules([{
                                 dir: "src",
@@ -91,10 +84,10 @@ Buntest.describe("ProjectResolution", (function () {
                                 subdirs: "NoSubdirs"
                               }], projectRoot);
                         var expectedModules = [
-                            "src/ProjectResolution.res",
-                            "src/RescriptConfig.res",
-                            "src/Main.res",
-                            "src/Docgen.res"
+                            "src/MathUtils.res",
+                            "src/StringHelpers.res",
+                            "src/ArrayUtils.res",
+                            "src/UserTypes.res"
                           ].map(function (x) {
                               return Nodepath.resolve(projectRoot, x);
                             });
